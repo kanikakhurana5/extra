@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Assistant</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chatbox { width: 400px; height: 300px; border: 1px solid #ccc; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
+        #userInput { width: 300px; }
+    </style>
+</head>
+<body>
+
+    <h1>Hello! I am your health assistant.</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type your query here..." />
+    <button id="sendBtn">Send</button>
+
+    <script>
+        const sendButton = document.getElementById('sendBtn');
+        const userInput = document.getElementById('userInput');
+        const chatbox = document.getElementById('chatbox');
+
+        sendButton.addEventListener('click', async () => {
+            const query = userInput.value;
+            if (!query) return;
+
+            // Display user query
+            chatbox.innerHTML += `<div>User: ${query}</div>`;
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/getDiagnosis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query }),
+                });
+
+                const data = await response.json();
+                chatbox.innerHTML += `<div>Assistant: ${data.answer}</div>`;
+                chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
+            } catch (error) {
+                chatbox.innerHTML += `<div>Error fetching response from API.</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
