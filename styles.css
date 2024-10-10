@@ -1,0 +1,65 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #d3e8f4; /* Lightest shade of blue for the background */
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.health-form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 600px;
+}
+
+h2 {
+    text-align: center;
+    color: #05386b; /* Darker shade of blue for headings */
+}
+
+input, textarea {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #0e5e9b; /* Mid-range shade of blue for borders */
+    background-color: #d3e8f4; /* Very light blue for input backgrounds */
+}
+
+textarea {
+    height: 200px;
+}
+
+button {
+    background-color: #0e5e9b; /* Strong mid-range blue for the button */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #05386b; /* Dark blue on hover for the button */
+}
+
+#emergencyBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #89bcd9; /* Light blue for emergency button */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}

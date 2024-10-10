@@ -1,47 +1,58 @@
 const express = require('express');
-const OpenAI = require('openai');
-const axios = require('axios');
-const path = require('path');
-require('dotenv').config();
+const bodyParser = require('body-parser');
+const twilio = require('twilio');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = 3000;
 
-// Middleware to handle JSON requests
-app.use(express.json());
-app.use(express.static('public'));
+// Twilio Credentials (replace with your actual Twilio credentials)
+const accountSid = 'AC802be7fe51f92edb3aa4d63af6cb65c3'; // Replace with your Twilio Account SID
+const authToken = '274f0037bb2c4edd34a39aeab08f0af6';   // Replace with your Twilio Auth Token
+const client = twilio(accountSid, authToken);
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'des.html'));
-});
+// Middleware
+app.use(bodyParser.json());
+app.use(express.static('public')); // Ensure 'public' folder contains index.html and style.css
 
-// Initialize OpenAI API client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+// Hardcoded emergency contacts
+const emergencyContacts = [
+    { name: 'John Doe', phoneNumber: '+917340165640' }, // Replace with actual phone numbers
+    { name: 'Jane Smith', phoneNumber: '+919149416978' },
+    // Add more contacts as needed
+];
 
-// Route for getting diagnosis
-app.post('/getDiagnosis', async (req, res) => {
-    const { query } = req.body;
+// Route to handle SMS sending
+app.post('/send-sms', (req, res) => {
+    const { bp, bloodSugar, heartRate, symptoms } = req.body;
 
-    if (!query) {
-        return res.status(400).json({ answer: 'Please provide a question.' });
+    // Validate input data
+    if (!bp || !bloodSugar || !heartRate || !symptoms) {
+        return res.status(400).json({ message: 'All fields are required' });
     }
 
-    try {
-        const response = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: query }],
-        });
+    // Prepare the message content
+    const message = `Emergency Alert!\nHealth Details:\nBlood Pressure: ${bp}\nBlood Sugar Level: ${bloodSugar}\nHeart Rate: ${heartRate}\nSymptoms: ${symptoms}`;
 
-        res.json({ answer: response.choices[0].message.content });
-    } catch (error) {
-        console.error('Error fetching response:', error);
-        res.status(500).json({ answer: 'Error fetching response from OpenAI API' });
-    }
+    // Send SMS to each emergency contact
+    Promise.all(emergencyContacts.map(contact => {
+        return client.messages.create({
+            body: message,
+            from: '+12088377539',  // Replace with your Twilio phone number
+            to: contact.phoneNumber
+        })
+        .then(message => console.log(`SMS sent to ${contact.phoneNumber} with SID: ${message.sid}`))
+        .catch(error => console.error(`Failed to send SMS to ${contact.phoneNumber}:`, error));
+    }))
+    .then(() => {
+        res.json({ message: 'SMS sent to emergency contacts!' });
+    })
+    .catch(err => {
+        console.error('Error sending SMS:', err);
+        res.status(500).json({ message: 'Error sending SMS' });
+    });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Start server
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
 });
-
